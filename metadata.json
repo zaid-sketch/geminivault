@@ -1,0 +1,6 @@
+{
+  "name": "GeminiVault",
+  "description": "A secure AI-powered personal journaling and reflection application featuring owner-isolated Firestore persistence and Gemini Reflection Insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

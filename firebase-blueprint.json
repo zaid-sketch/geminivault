@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid"]
+    },
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "User journal entry stored under user isolation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "mood": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "favorite": { "type": "boolean" },
+        "pinned": { "type": "boolean" },
+        "wordCount": { "type": "number" },
+        "readingTimeMinutes": { "type": "number" },
+        "aiPromptUsed": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "title", "content", "mood", "createdAt", "updatedAt"]
+    },
+    "ReflectionInsight": {
+      "title": "ReflectionInsight",
+      "description": "AI-generated structured reflection analysis stored under user isolation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "entryIds": { "type": "array", "items": { "type": "string" } },
+        "entryTitles": { "type": "array", "items": { "type": "string" } },
+        "keyThemes": { "type": "array", "items": { "type": "string" } },
+        "emotionalPatterns": { "type": "array", "items": { "type": "string" } },
+        "positiveProgress": { "type": "array", "items": { "type": "string" } },
+        "recurringChallenges": { "type": "array", "items": { "type": "string" } },
+        "reflectionSummary": { "type": "string" },
+        "followUpQuestions": { "type": "array", "items": { "type": "string" } },
+        "modelUsed": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "entryIds", "keyThemes", "emotionalPatterns", "positiveProgress", "recurringChallenges", "reflectionSummary", "followUpQuestions", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document",
+      "allow": {
+        "read": "request.auth != null && request.auth.uid == userId",
+        "write": "request.auth != null && request.auth.uid == userId"
+      }
+    },
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "JournalEntry",
+      "description": "User journal entries isolated to authenticated owner",
+      "allow": {
+        "read": "request.auth != null && request.auth.uid == userId",
+        "write": "request.auth != null && request.auth.uid == userId"
+      }
+    },
+    "/users/{userId}/reflections/{reflectionId}": {
+      "schema": "ReflectionInsight",
+      "description": "User AI reflection insights isolated to authenticated owner",
+      "allow": {
+        "read": "request.auth != null && request.auth.uid == userId",
+        "write": "request.auth != null && request.auth.uid == userId"
+      }
+    },
+    "/users/{userId}/interactions/{interactionId}": {
+      "schema": "ReflectionInsight",
+      "description": "User AI interactions isolated to authenticated owner",
+      "allow": {
+        "read": "request.auth != null && request.auth.uid == userId",
+        "write": "request.auth != null && request.auth.uid == userId"
+      }
+    }
+  }
+}
