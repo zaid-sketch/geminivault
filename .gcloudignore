@@ -1,0 +1,10 @@
+.gcloudignore
+.git
+.git/**
+node_modules
+node_modules/**
+.env
+.env.*
+!.env.example
+*.log
+src/components/AIAssistantView.tsx.backup
