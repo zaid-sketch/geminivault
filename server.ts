@@ -3,11 +3,19 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { initializeApp, applicationDefault } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 
 dotenv.config();
 
+initializeApp({
+  credential: applicationDefault(),
+});
+
+const adminAuth = getAuth();
+
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // Standard Top-Level Request Deserialization (Ordering Guarantee)
 app.use(express.json({ limit: '2mb' }));
@@ -112,12 +120,32 @@ app.post('/api/reflections/generate', async (req, res) => {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const { userId, entries } = body;
 
-    // Verify Authorization Header Presence
+    // Verify Firebase ID token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized: Missing or invalid Authorization Bearer token.',
+      });
+    }
+
+    const idToken = authHeader.substring(7).trim();
+
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch (authError) {
+      console.warn('[GeminiVault] Invalid Firebase ID token:', authError);
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Invalid or expired Firebase ID token.',
+      });
+    }
+
+    if (decodedToken.uid !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Forbidden: Authenticated user does not match requested userId.',
       });
     }
 
